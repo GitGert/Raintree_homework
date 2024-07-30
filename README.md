@@ -28,7 +28,5 @@ Now you are all set to test out the programm.
 
  # HOW TO RUN:
 
- ## Exercise 1:
-
 
 
