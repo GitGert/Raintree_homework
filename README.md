@@ -2,7 +2,6 @@
 
 in this project I followed the instructions to demonstrate my skills using PHP and MYSQL
 
-
 ## Setting Up Your Local Environment
 
 You will need to have [MySQL](https://dev.mysql.com/doc/mysql-getting-started/en/) and [PHP](https://www.php.net/manual/en/install.php) installed and configured.
@@ -27,6 +26,3 @@ DB_PASSWORD=your_password
 Now you are all set to test out the programm.
 
  # HOW TO RUN:
-
-
-
