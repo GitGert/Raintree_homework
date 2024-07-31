@@ -1,113 +1,166 @@
-<?php 
+<?php
+
+include "database.php";
+
 
 interface PatientRecord {
-    public function get_patient_id();
+    public function get_id();
     public function get_patient_number();
 }
 
 class Patient implements PatientRecord {
-    public $_id = "";
-    public $pn = "";
-    public $first = "";
-    public $last = "";
-    public $dob = "";
-    public $insurace_records = [];
+    private $_id ;
+    private $pn;
+    private $first ;
+    private $last ;
+    private $dob ;
+    //TODO, perhaps convert this into a object/class like thing?s
+    private $insurace_records = [];
 
     public function __construct($patient_number) {
         // TODO: this constructor should qurey the db and fill all of the date using thes PATIENT NUMBER (pn)
-        $this->set_values_from_db($patient_number);
+        $conn = connect_to_database();
+        use_current_db($conn);
+        $patinet_values = get_patient_data($conn, $patient_number);
+
+        $this -> _id = $patinet_values["_id"];
+        $this -> pn = $patinet_values["pn"];
+        $this -> first = $patinet_values["first"];
+        $this -> last = $patinet_values["last"];
+        $this -> dob = $patinet_values["dob"];
+        
+        
+        $patient_insurance_IDs = get_insurance_IDs($conn, $patient_number);
+
+        for ($i = 0; $i < count($patient_insurance_IDs); $i++ ){
+            $temp_val = new Insurance($patient_insurance_IDs[$i]);
+            array_push( $this -> insurace_records, $temp_val);
+        }
+
+        // $this ->insurace_records = get_patients_insurance_data($conn, $patient_number);
+        mysqli_close($conn);
     }
 
-    private function set_values_from_db($pn){
-        $env = parse_ini_file('.env');
-        $server_name = $env['DB_SERVER'];
-        $username = $env['DB_USERNAME'];
-        $password = $env['DB_PASSWORD'];
-        
-        $DB_NAME = "insurance_db";
-        $use_current_DB= "USE $DB_NAME";
-        
-        
-        $conn = mysqli_connect($server_name, $username, $password);
-        if (!$conn) {
-            die("Connection failed: " . mysqli_connect_error() . PHP_EOL);
-        }
-        echo "DB Connected successfully" . PHP_EOL;
-        
-        $sql = "$use_current_DB";
-        if (mysqli_query($conn, $sql)) {
-        } else {
-            echo "Error with DB: " . mysqli_error($conn)  . PHP_EOL;
-        }
-
-        //TODO: change this query to the safer format, this is a unsafe DB query
-        $sql = "SELECT * FROM patient where pn =$pn";
-
-        $result = $conn->query($sql);
-
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-            echo  $row["dob"] . ", ".$row["last"] . ", ". $row["first"] . ", ".   PHP_EOL;
-            $this -> _id = $row["_id"];
-            $this -> pn = $row["pn"];
-            $this -> first = $row["first"];
-            $this -> last = $row["last"];
-            $this -> dob = $row["dob"];
-            }
-        } else {
-            echo "ERROR: no patient found with Patient Number: $pn\n";
-        }
-
-        //TODO: change this query to the safer format, this is a unsafe DB query
-        $sql = "SELECT * FROM insurance where patient_id =$pn";
-
-        $result = $conn->query($sql);
-
-
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-            $temp_array= [];
-            array_push($temp_array,$row["_id"]);
-            array_push($temp_array,$row["patient_id"]);
-            array_push($temp_array,$row["iname"]);
-            array_push($temp_array,$row["from_date"]);
-            array_push($temp_array,$row["to_date"]);
-
-            array_push($this -> insurace_records, $temp_array);
-            }
-        } else {
-            echo "ERROR: no patient found with Patient Number: $pn\n";
-        }
-
-    }
 
     public function get_patient_name(){
-        return $first . " " . $last;
+        return $this -> first . " " . $this -> last;
+    }
+    
+    public function get_patient_insurance_records(){
+        return $this -> insurace_records;
     }
 
-    public function get_patient_id() {
-        return $_id;
+
+    public function get_id() {
+        return $this -> _id;
     }
     
     public function get_patient_number() {
-        return $pn;
+        return $this->pn;
+    }
+
+    public function show_patient_insurance_isValid($input_date){
+        for ($i = 0; $i < count($this -> insurace_records); $i++ ){
+            $insurance_object = $this -> insurace_records[$i];
+            $start_date = $insurance_object ->get_insurance_from_date();
+            $end_date = $insurance_object->get_insurance_to_date();
+            
+
+            $format = "d-m-y";
+            $start_date  = \DateTime::createFromFormat($format, $start_date);
+            $end_date  = \DateTime::createFromFormat($format, $end_date);
+            $new_date  = \DateTime::createFromFormat($format, $input_date);
+
+            $isValid = "No";
+            if ($new_date < $end_date){
+                $isValid = "Yes";
+            }
+
+            echo $this -> pn . ", ". $this -> get_patient_name() . ", " . $insurance_object -> get_insurance_name() . ", " . $isValid . PHP_EOL;
+
+        }
     }
 }
 
-$temp_pn = "1";
-$patient1 = new Patient($temp_pn);
-echo $patient1 ->_id;
-echo $patient1 ->first;
-echo $patient1 ->last;
-echo $patient1 ->dob;
-echo "\n\n";
-$tempARR = $patient1 -> insurace_records;
-for ($i = 0; $i < count($tempARR) ; $i++) {
-    echo "[ ";
-    for ($j = 0; $j < count($tempARR[$i]) ; $j++) {
-        echo $tempARR[$i][$j]. "  ";
-        
+
+class Insurance implements PatientRecord {
+    private $_id ;
+    private $patient_id;
+    private $iname ;
+    private $from_date ;
+    private $to_date ;
+
+    // public function __toString(){
+    //     return "\n\nInsurance class currently only has its own id: " . $this -> insurance_id;
+    // }
+
+    public function __construct($insurance_id) {
+        // make db query with the given insurance_id...?
+
+        $conn = connect_to_database();
+        use_current_db($conn);
+        $insurace_data = get_insurance_data($conn, $insurance_id);
+
+        $this -> _id = $insurance_id;
+        $this -> patient_id = $insurace_data["patient_id"];
+        $this -> iname = $insurace_data["iname"];
+        $this -> from_date = $insurace_data["from_date"];
+        $this -> to_date = $insurace_data["to_date"];
+
+        mysqli_close($conn);
     }
-    echo "]\n";
+    // public function get_id();
+    // public function get_patient_number();
+
+    public function is_insurance_valid($date){
+        $infinite = False;
+        if (!$this -> to_date){
+            $infinite = True;
+        }
+        $format = "d-m-y";
+        
+        $start_date  = \DateTime::createFromFormat($format, $this -> from_date);
+        $end_date  = \DateTime::createFromFormat($format, $this -> to_date);
+        $new_date  = \DateTime::createFromFormat($format, $date);
+        
+        echo $start_date -> Format("d-m-y\n");
+        echo $end_date -> Format("d-m-y\n");
+        echo $new_date -> Format("d-m-y\n");
+
+        // echo $new_date >= $start_date
+        // echo $new_date = $start_date
+
+        if ($new_date >= $start_date && $new_date <=$end_date || $infinite == True && $new_date >= $start_date){
+            return True;
+        }
+        return False;
+    }
+
+    public function get_id() {
+        return $this -> _id;
+    }
+    public function get_patient_number() {
+        return $this->patient_id;
+    }
+    public function get_insurance_name() {
+        return $this->iname;
+    }
+    public function get_insurance_from_date() {
+        return $this->from_date;
+    }
+    public function get_insurance_to_date() {
+        return $this->to_date;
+    }
 }
+
+// $temp_pn = "1";
+// $patient1 = new Patient($temp_pn);
+// echo $patient1->get_patient_number() . PHP_EOL;
+// $patient1->show_patient_insurance_isValid("03-10-20");
+// echo $patient1->get_patient_insurance_records()[1];
+// $insurace_1 = new Insurance("1");
+// $bool_val=  $insurace_1 -> is_insurance_valid("06-01-23");
+// echo $bool_val ? 'true' : 'false';
+// echo "\n"
+
 ?>

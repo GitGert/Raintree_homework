@@ -24,8 +24,7 @@ if (mysqli_query($conn, $sql)) {
 
 
 echo "\n" . "solution to: 3.2 A):\n\n";
-
-$sql = "SELECT  LPAD(CAST(p.pn AS CHAR), 10, '0') AS formatted_pn,  p.last,  p.first, p._id, i.from_date, i.to_date  FROM patient as p
+$sql = "SELECT  LPAD(CAST(p.pn AS CHAR), 10, '0') AS formatted_pn,  p.last,  p.first, p._id, DATE_FORMAT(i.from_date, '%m-%d-%y') AS from_date, DATE_FORMAT(i.to_date, '%m-%d-%y') AS to_date  FROM patient as p
 INNER JOIN insurance as i on i.patient_id = p._id
 ORDER BY to_date, last";
 
