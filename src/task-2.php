@@ -64,10 +64,8 @@ if ($result->num_rows > 0) {
   ksort($letter_map);
 
   foreach ($letter_map as $key => $value) {
-    $precentage = round($value/$total *100, 2);
-    echo "$key\t$value\t$precentage" . "%" . PHP_EOL;
+    $percentage = round($value/$total *100, 2);
+    echo "$key\t$value\t$percentage" . "%" . PHP_EOL;
 }
 
 mysqli_close($conn);
-
-?>

@@ -14,40 +14,40 @@ class Patient implements PatientRecord {
     private $first ;
     private $last ;
     private $dob ;
-    //TODO, perhaps convert this into a object/class like thing?s
-    private $insurace_records = [];
+    private $insurance_records = [];
 
     public function __construct($patient_number) {
-        // TODO: this constructor should qurey the db and fill all of the date using thes PATIENT NUMBER (pn)
         $conn = connect_to_database();
         use_current_db($conn);
-        $patinet_values = get_patient_data($conn, $patient_number);
+        $patient_values = get_patient_data($conn, $patient_number);
 
-        $this -> _id = $patinet_values["_id"];
-        $this -> pn = $patinet_values["pn"];
-        $this -> first = $patinet_values["first"];
-        $this -> last = $patinet_values["last"];
-        $this -> dob = $patinet_values["dob"];
+        $this -> _id = $patient_values["_id"];
+        $this -> pn = $patient_values["pn"];
+        $this -> first = $patient_values["first"];
+        $this -> last = $patient_values["last"];
+        $this -> dob = $patient_values["dob"];
         
         
-        $patient_insurance_IDs = get_insurance_IDs($conn, $patient_number);
+        $patient_insurance_ids = get_insurance_ids($conn, $patient_number);
 
-        for ($i = 0; $i < count($patient_insurance_IDs); $i++ ){
-            $temp_val = new Insurance($patient_insurance_IDs[$i]);
-            array_push( $this -> insurace_records, $temp_val);
+        for ($i = 0; $i < count($patient_insurance_ids); $i++ ){
+            $temp_val = new Insurance($patient_insurance_ids[$i]);
+            array_push( $this -> insurance_records, $temp_val);
         }
         mysqli_close($conn);
     }
 
+    public function __tostring() {
+        return "_id: " . $this -> _id .", pn: ". $this -> pn .", first: ". $this -> first .", last: ". $this -> last . ", dob: " . $this -> dob;
+    }
 
     public function get_patient_name(){
         return $this -> first . " " . $this -> last;
     }
     
     public function get_patient_insurance_records(){
-        return $this -> insurace_records;
+        return $this -> insurance_records;
     }
-
 
     public function get_id() {
         return $this -> _id;
@@ -57,25 +57,26 @@ class Patient implements PatientRecord {
         return $this->pn;
     }
 
-    public function show_patient_insurance_isValid($input_date){
-        for ($i = 0; $i < count($this -> insurace_records); $i++ ){
-            $insurance_object = $this -> insurace_records[$i];
+    public function show_patient_insurance_is_valid($input_date){
+        for ($i = 0; $i < count($this -> insurance_records); $i++ ){
+            $insurance_object = $this -> insurance_records[$i];
             $start_date = $insurance_object ->get_insurance_from_date();
             $end_date = $insurance_object->get_insurance_to_date();
             
 
-            $format = "d-m-y";
+            $format = "Y-m-d";
             $start_date  = \DateTime::createFromFormat($format, $start_date);
             $end_date  = \DateTime::createFromFormat($format, $end_date);
-            //TODO: handle case where the input string already is a date.
-            $new_date  = \DateTime::createFromFormat($format, $input_date);
 
-            $isValid = "No";
-            if ($new_date <= $end_date && $new_date >= $start_date){
-                $isValid = "Yes";
+            $format = "d-m-y";
+            $formatted_input_date  = \DateTime::createFromFormat($format, $input_date);
+
+            $is_valid = "No";
+            if ($formatted_input_date <= $end_date && $formatted_input_date >= $start_date){
+                $is_valid = "Yes";
             }
 
-            echo $this -> pn . ", ". $this -> get_patient_name() . ", " . $insurance_object -> get_insurance_name() . ", " . $isValid . PHP_EOL;
+            echo $this -> pn . ", ". $this -> get_patient_name() . ", " . $insurance_object -> get_insurance_name() . ", " . $is_valid . PHP_EOL;
 
         }
     }
@@ -93,15 +94,19 @@ class Insurance implements PatientRecord {
 
         $conn = connect_to_database();
         use_current_db($conn);
-        $insurace_data = get_insurance_data($conn, $insurance_id);
+        $insurance_data = get_insurance_data($conn, $insurance_id);
 
         $this -> _id = $insurance_id;
-        $this -> patient_id = $insurace_data["patient_id"];
-        $this -> iname = $insurace_data["iname"];
-        $this -> from_date = $insurace_data["from_date"];
-        $this -> to_date = $insurace_data["to_date"];
+        $this -> patient_id = $insurance_data["patient_id"];
+        $this -> iname = $insurance_data["iname"];
+        $this -> from_date = $insurance_data["from_date"];
+        $this -> to_date = $insurance_data["to_date"];
 
         mysqli_close($conn);
+    }
+
+    public function __tostring() {
+        return "_id: " . $this -> _id .", patient_id: ". $this -> patient_id .", insurance name: ". $this -> iname .", from_date: ". $this -> get_insurance_from_date() . ", to_date: " . $this -> to_date;
     }
 
     public function is_insurance_valid($date){
@@ -139,14 +144,3 @@ class Insurance implements PatientRecord {
         return $this->to_date;
     }
 }
-
-// $temp_pn = "1";
-// $patient1 = new Patient($temp_pn);
-// echo $patient1->get_patient_number() . PHP_EOL;
-// $patient1->show_patient_insurance_isValid("03-10-20");
-// $insurace_1 = new Insurance("1");
-// $bool_val=  $insurace_1 -> is_insurance_valid("06-01-23");
-// echo $bool_val ? 'true' : 'false';
-// echo  PHP_EOL
-
-?>

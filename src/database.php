@@ -1,5 +1,5 @@
-<?php 
-define("ENV",parse_ini_file('.env') );
+<?php
+define("ENV", parse_ini_file(__DIR__ . '/../.env'));
 define("SERVER_NAME",ENV['DB_SERVER']);
 define("USERNAME",ENV['DB_USERNAME']);
 define("PASSWORD",ENV['DB_PASSWORD']);
@@ -17,7 +17,6 @@ function connect_to_database(){
 function use_current_db($conn){
     $sql = "USE " . DB_NAME;
     if (mysqli_query($conn, $sql)) {
-        // echo "Query: $sql - SUCCESS" . PHP_EOL;
     } else {
         echo "Error with DB: " . mysqli_error($conn)  . PHP_EOL;
     }
@@ -27,7 +26,6 @@ function use_current_db($conn){
 function get_patient_data($conn, $pn){
     $patient_values = array();
     
-    //TODO: change this query to the safer format, this is a unsafe DB query
     $sql = "SELECT _id, LPAD(CAST(pn AS CHAR), 11, '0') AS formatted_pn, first, last, dob FROM patient where pn =$pn ORDER BY pn";
     
     $result = $conn->query($sql);
@@ -51,7 +49,6 @@ function get_patient_data($conn, $pn){
 
 function get_insurance_data($conn, $insurance_ID){
     $result_array = [];
-    //TODO: change this query to the safer format, this is a unsafe DB query
     $sql = "SELECT _id, patient_id, iname, from_date, to_date FROM insurance where _id =$insurance_ID";
     $result = $conn->query($sql);
 
@@ -72,35 +69,35 @@ function get_insurance_data($conn, $insurance_ID){
 }
 
 
-function get_insurance_IDs($conn, $patient_number){
-    $list_of_insurance_IDs = [];
+function get_insurance_ids($conn, $patient_number){
+    $list_of_insurance_ids = [];
 
     $sql = "SELECT * FROM insurance where patient_id =$patient_number";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-        array_push($list_of_insurance_IDs,$row["_id"]);
+        array_push($list_of_insurance_ids,$row["_id"]);
         }
     } else {
         echo "ERROR: no patient found with Patient Number: $patient_number" .  PHP_EOL;
         return;
     }
-    return $list_of_insurance_IDs;
+    return $list_of_insurance_ids;
 }
 
-function get_all_patient_IDs(){
+function get_all_patient_ids(){
     $conn = connect_to_database();
     use_current_db($conn);
 
-    $list_of_patient_IDs = [];
+    $list_of_patient_ids = [];
 
     $sql = "SELECT _id FROM patient";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-        array_push($list_of_patient_IDs,$row["_id"]);
+        array_push($list_of_patient_ids,$row["_id"]);
         }
     } else {
         echo "ERROR: no patients found". PHP_EOL;
@@ -108,35 +105,5 @@ function get_all_patient_IDs(){
         return;
     }
     mysqli_close($conn);
-    return $list_of_patient_IDs;
+    return $list_of_patient_ids;
 }
-
-
-// $stmt = $connection->prepare("INSERT INTO table (column) VALUES (?)");
-// $stmt->bind_param("s", $variable); // "s" indicates the variable type is string
-// $stmt->execute();
-
-
-// function get_patient_data($conn, $pn){
-//      //TODO: change this query to the safer format, this is a unsafe DB query
-//         $sql = "SELECT * FROM patient where pn =$pn";
-
-//         $result = $conn->query($sql);
-
-//         if ($result->num_rows > 0) {
-//             while($row = $result->fetch_assoc()) {
-//             echo  $row["dob"] . ", ".$row["last"] . ", ". $row["first"] . ", ".   PHP_EOL;
-//             $this -> _id = $row["_id"];
-//             $this -> pn = $row["pn"];
-//             $this -> first = $row["first"];
-//             $this -> last = $row["last"];
-//             $this -> dob = $row["dob"];
-//             }
-//         } else {
-//             echo "ERROR: no patient found with Patient Number: $pn" . PHP_EOL;
-//         }
-
-// }
-
-
-?>
