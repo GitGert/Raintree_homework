@@ -57,7 +57,7 @@ Optionally you can also uncomment any or both of these lines in order to get cla
 ```
 
 
-# USAGE OF AI DURING DEVELOPMENT
+## USAGE OF AI DURING DEVELOPMENT
 
 Since the task was fairly straight forward I would like to point out where I did and did not use the help of AI.
 

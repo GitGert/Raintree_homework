@@ -25,8 +25,8 @@ function use_current_db($conn){
 
 function get_patient_data($conn, $pn){
     $patient_values = array();
-    
-    $sql = "SELECT _id, LPAD(CAST(pn AS CHAR), 11, '0') AS formatted_pn, first, last, dob FROM patient where pn =$pn ORDER BY pn";
+
+    $sql = "SELECT _id, LPAD(CAST(pn AS CHAR), 11, '0') AS formatted_pn, first, last, DATE_FORMAT(dob, '%m-%d-%y') AS dob FROM patient where pn =$pn ORDER BY pn";
     
     $result = $conn->query($sql);
     
@@ -49,7 +49,7 @@ function get_patient_data($conn, $pn){
 
 function get_insurance_data($conn, $insurance_ID){
     $result_array = [];
-    $sql = "SELECT _id, patient_id, iname, from_date, to_date FROM insurance where _id =$insurance_ID";
+    $sql = "SELECT _id, patient_id, iname, DATE_FORMAT(from_date, '%m-%d-%y') AS from_date, DATE_FORMAT(to_date, '%m-%d-%y') AS to_date  FROM insurance where _id =$insurance_ID";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
@@ -69,7 +69,7 @@ function get_insurance_data($conn, $insurance_ID){
 }
 
 
-function get_insurance_ids($conn, $patient_number){
+function get_all_insurance_ids($conn, $patient_number){
     $list_of_insurance_ids = [];
 
     $sql = "SELECT * FROM insurance where patient_id =$patient_number";
@@ -86,18 +86,18 @@ function get_insurance_ids($conn, $patient_number){
     return $list_of_insurance_ids;
 }
 
-function get_all_patient_ids(){
+function get_all_patient_numbers(){
     $conn = connect_to_database();
     use_current_db($conn);
 
-    $list_of_patient_ids = [];
+    $list_of_patient_numbers = [];
 
-    $sql = "SELECT _id FROM patient";
+    $sql = "SELECT pn FROM patient ORDER BY pn";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-        array_push($list_of_patient_ids,$row["_id"]);
+        array_push($list_of_patient_numbers,$row["pn"]);
         }
     } else {
         echo "ERROR: no patients found". PHP_EOL;
@@ -105,5 +105,5 @@ function get_all_patient_ids(){
         return;
     }
     mysqli_close($conn);
-    return $list_of_patient_ids;
+    return $list_of_patient_numbers;
 }

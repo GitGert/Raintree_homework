@@ -5,22 +5,20 @@ include("database.php");
 $conn = connect_to_database();
 use_current_db($conn);
 
-
 echo   PHP_EOL . "solution to: 3.2 A):". PHP_EOL .PHP_EOL ;
 
-$sql = "SELECT  LPAD(CAST(p.pn AS CHAR), 11, '0') AS formatted_pn,  p.last,  p.first, p._id, DATE_FORMAT(i.from_date, '%m-%d-%y') AS from_date, DATE_FORMAT(i.to_date, '%m-%d-%y') AS to_date  FROM patient as p
+$sql = "SELECT  LPAD(CAST(p.pn AS CHAR), 11, '0') AS formatted_pn,  p.last,  p.first, p._id, DATE_FORMAT(i.from_date, '%m-%d-%y') AS formatted_from_date, DATE_FORMAT(i.to_date, '%m-%d-%y') AS formatted_to_date  FROM patient as p
 INNER JOIN insurance as i on i.patient_id = p._id
-ORDER BY to_date, last";
+ORDER BY i.from_date, p.last";
 
 $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-      echo  $row["formatted_pn"] . ", ".$row["last"] . ", ". $row["first"] . ", ".  $row["from_date"] . "," .  $row["to_date"] . PHP_EOL;
+      echo  $row["formatted_pn"] . ", ".$row["last"] . ", ". $row["first"] . ", ".  $row["formatted_from_date"] . "," .  $row["formatted_to_date"] . PHP_EOL;
     }
   } else {
     echo "0 results";
   }
-
 
 echo PHP_EOL . PHP_EOL . "solution to: 3.2 B):" . PHP_EOL . PHP_EOL;
 

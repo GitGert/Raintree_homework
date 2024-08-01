@@ -2,10 +2,10 @@
 include "task-3.php";
 
 function test_task3_classes(){
-    $patient_id_array = get_all_patient_IDs();
+    $patient_number_array = get_all_patient_numbers();
 
-    for ($i = 0; $i < count($patient_id_array); $i++){
-        $patient_id = $patient_id_array[$i];
+    for ($i = 0; $i < count($patient_number_array); $i++){
+        $patient_id = $patient_number_array[$i];
         $patient = new Patient($patient_id);
 
         $insurance_list = $patient->get_patient_insurance_records();
@@ -14,7 +14,7 @@ function test_task3_classes(){
             $insurance_object = $insurance_list[$j];
             
             $is_valid = "No";
-            if ($insurance_object -> is_insurance_valid(date("d-m-y"))){
+            if ($insurance_object -> is_insurance_valid(date("m-d-y"))){
                 $is_valid = "Yes";
             };
             
@@ -32,7 +32,7 @@ function test_patient(){
 
     echo $patient1 . PHP_EOL;
     #output should be:
-    // _id: 1, pn: 00000000001, first: John, last: Doe, dob: 1980-01-01
+    // _id: 3, pn: 00000000001, first: John, last: Doe, dob: 01-01-80
 
     $patient1 -> show_patient_insurance_is_valid("01-05-24");
     # output should be:
@@ -48,8 +48,8 @@ function test_patient(){
         echo $record . "\n";
     }
     # output should be:
-    // _id: 1, patient_id: 1, insurance name: Policy A, from_date: 2020-06-01, to_date: 2023-06-01
-    // _id: 2, patient_id: 1, insurance name: Policy B, from_date: 2021-06-01, to_date: 2024-06-01
+    // _id: 1, patient_id: 1, insurance name: Policy A, from_date: 06-01-20, to_date: 06-01-23
+    // _id: 2, patient_id: 1, insurance name: Policy B, from_date: 06-01-21, to_date: 06-01-24
 }
 
 function test_insurance(){
@@ -58,7 +58,7 @@ function test_insurance(){
 
     echo $insurance1 . PHP_EOL;
     #output should be:
-    // _id: 1, patient_id: 1, insurance name: Policy A, from_date: 2020-06-01, to_date: 2023-06-01
+    // _id: 1, patient_id: 1, insurance name: Policy A, from_date: 06-01-20, to_date: 06-01-23
 
     echo $insurance1 -> is_insurance_valid("01-01-22") ? "true" .PHP_EOL: "false" .PHP_EOL;
     # output should be:
@@ -70,7 +70,7 @@ function test_insurance(){
 
     echo $insurance1 -> get_insurance_from_date() ." to " . $insurance1 -> get_insurance_to_date() . PHP_EOL;
     # output should be:
-    // 2020-06-01 to 2023-06-01
+    // 06-01-20 to 06-01-23
 }
 
 

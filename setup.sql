@@ -1,13 +1,6 @@
-DROP DATABASE insurance_db;
+DROP DATABASE IF EXISTS insurance_db;
+
 CREATE DATABASE IF NOT EXISTS insurance_db;
-
-SET FOREIGN_KEY_CHECKS = 0;
-
-DROP TABLE IF EXISTS insurance;
-
-DROP TABLE IF EXISTS  patient;
-
-SET FOREIGN_KEY_CHECKS = 1;
 
 USE insurance_db;
 
@@ -29,11 +22,11 @@ CREATE TABLE IF NOT EXISTS insurance (
     FOREIGN KEY (patient_id) REFERENCES patient(_id)
 );
 
-INSERT INTO patient (pn, first, last, dob) VALUES ('1', 'John', 'Doe', '1980-01-01');
-INSERT INTO patient (pn, first, last, dob) VALUES ('2', 'Jane', 'Smith', '1985-02-02');
-INSERT INTO patient (pn, first, last, dob) VALUES ('3', 'Alice', 'Johnson', '1990-03-03');
-INSERT INTO patient (pn, first, last, dob) VALUES ('4', 'Bob', 'Williams', '1995-04-04');
 INSERT INTO patient (pn, first, last, dob) VALUES ('5', 'Charlie', 'Brown', '2000-05-05');
+INSERT INTO patient (pn, first, last, dob) VALUES ('2', 'Jane', 'Smith', '1985-02-02');
+INSERT INTO patient (pn, first, last, dob) VALUES ('1', 'John', 'Doe', '1980-01-01');
+INSERT INTO patient (pn, first, last, dob) VALUES ('4', 'Bob', 'Williams', '1995-04-04');
+INSERT INTO patient (pn, first, last, dob) VALUES ('3', 'Alice', 'Johnson', '1990-03-03');
 
 
 

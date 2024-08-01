@@ -28,7 +28,7 @@ class Patient implements PatientRecord {
         $this -> dob = $patient_values["dob"];
         
         
-        $patient_insurance_ids = get_insurance_ids($conn, $patient_number);
+        $patient_insurance_ids = get_all_insurance_ids($conn, $patient_number);
 
         for ($i = 0; $i < count($patient_insurance_ids); $i++ ){
             $temp_val = new Insurance($patient_insurance_ids[$i]);
@@ -60,15 +60,13 @@ class Patient implements PatientRecord {
     public function show_patient_insurance_is_valid($input_date){
         for ($i = 0; $i < count($this -> insurance_records); $i++ ){
             $insurance_object = $this -> insurance_records[$i];
+            
             $start_date = $insurance_object ->get_insurance_from_date();
             $end_date = $insurance_object->get_insurance_to_date();
-            
 
-            $format = "Y-m-d";
+            $format = "m-d-y";
             $start_date  = \DateTime::createFromFormat($format, $start_date);
             $end_date  = \DateTime::createFromFormat($format, $end_date);
-
-            $format = "d-m-y";
             $formatted_input_date  = \DateTime::createFromFormat($format, $input_date);
 
             $is_valid = "No";
@@ -77,7 +75,6 @@ class Patient implements PatientRecord {
             }
 
             echo $this -> pn . ", ". $this -> get_patient_name() . ", " . $insurance_object -> get_insurance_name() . ", " . $is_valid . PHP_EOL;
-
         }
     }
 }
@@ -114,15 +111,14 @@ class Insurance implements PatientRecord {
         if (!$this -> to_date){
             $infinite = True;
         }
-        
-        $format = "Y-m-d";
+
+        $format = "m-d-y";
         $start_date  = \DateTime::createFromFormat($format, $this -> from_date);
         $end_date  = \DateTime::createFromFormat($format, $this -> to_date);
-        $format = "d-m-y";
         $new_date  = \DateTime::createFromFormat($format, $date);
         
 
-        if ($new_date >= $start_date && $new_date <=$end_date || $infinite == True && $new_date >= $start_date){
+        if ($new_date >= $start_date && $new_date <=$end_date || $infinite && $new_date >= $start_date){
             return True;
         }
         return False;
