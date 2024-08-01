@@ -11,7 +11,6 @@ function connect_to_database(){
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error . PHP_EOL);
     }
-    // echo "DB Connected successfully" . PHP_EOL;
     return $conn;
 }
 
@@ -22,7 +21,6 @@ function use_current_db($conn){
     } else {
         echo "Error with DB: " . mysqli_error($conn)  . PHP_EOL;
     }
-
 }
 
 
@@ -30,20 +28,21 @@ function get_patient_data($conn, $pn){
     $patient_values = array();
     
     //TODO: change this query to the safer format, this is a unsafe DB query
-    $sql = "SELECT * FROM patient where pn =$pn";
+    $sql = "SELECT _id, LPAD(CAST(pn AS CHAR), 11, '0') AS formatted_pn, first, last, dob FROM patient where pn =$pn ORDER BY pn";
     
     $result = $conn->query($sql);
     
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
             $patient_values["_id"] = $row["_id"];
-            $patient_values["pn"] = $row["pn"];
+            $patient_values["pn"] = $row["formatted_pn"];
             $patient_values["first"] = $row["first"];
             $patient_values["last"] = $row["last"];
             $patient_values["dob"] = $row["dob"];
+
         }
     } else {
-        echo "ERROR: no patient found with Patient Number: $pn\n";
+        echo "ERROR: no patient found with Patient Number: $pn" . PHP_EOL;
     }
     
     return $patient_values;
@@ -53,7 +52,7 @@ function get_patient_data($conn, $pn){
 function get_insurance_data($conn, $insurance_ID){
     $result_array = [];
     //TODO: change this query to the safer format, this is a unsafe DB query
-    $sql = "SELECT _id, patient_id, iname, DATE_FORMAT(from_date, '%m-%d-%y') AS from_date, DATE_FORMAT(to_date, '%m-%d-%y') AS to_date FROM insurance where _id =$insurance_ID";
+    $sql = "SELECT _id, patient_id, iname, from_date, to_date FROM insurance where _id =$insurance_ID";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
@@ -65,7 +64,7 @@ function get_insurance_data($conn, $insurance_ID){
             $result_array["to_date"] = $row["to_date"];
         }
     } else {
-        echo "ERROR: no insurance found with id: $insurance_ID\n";
+        echo "ERROR: no insurance found with id: $insurance_ID". PHP_EOL;
         return;
     }
 
@@ -74,9 +73,6 @@ function get_insurance_data($conn, $insurance_ID){
 
 
 function get_insurance_IDs($conn, $patient_number){
-    // $conn = connect_to_database();
-    // use_current_db($conn);
-
     $list_of_insurance_IDs = [];
 
     $sql = "SELECT * FROM insurance where patient_id =$patient_number";
@@ -87,12 +83,10 @@ function get_insurance_IDs($conn, $patient_number){
         array_push($list_of_insurance_IDs,$row["_id"]);
         }
     } else {
-        echo "ERROR: no patient found with Patient Number: $patient_number\n";
+        echo "ERROR: no patient found with Patient Number: $patient_number" .  PHP_EOL;
         return;
     }
-
     return $list_of_insurance_IDs;
-
 }
 
 function get_all_patient_IDs(){
@@ -109,14 +103,13 @@ function get_all_patient_IDs(){
         array_push($list_of_patient_IDs,$row["_id"]);
         }
     } else {
-        echo "ERROR: no patients found\n";
+        echo "ERROR: no patients found". PHP_EOL;
         mysqli_close($conn);
         return;
     }
     mysqli_close($conn);
     return $list_of_patient_IDs;
 }
-
 
 
 // $stmt = $connection->prepare("INSERT INTO table (column) VALUES (?)");
@@ -140,15 +133,10 @@ function get_all_patient_IDs(){
 //             $this -> dob = $row["dob"];
 //             }
 //         } else {
-//             echo "ERROR: no patient found with Patient Number: $pn\n";
+//             echo "ERROR: no patient found with Patient Number: $pn" . PHP_EOL;
 //         }
 
 // }
-
-
-
-
-
 
 
 ?>

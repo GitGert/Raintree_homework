@@ -1,30 +1,14 @@
 <?php
-$env = parse_ini_file('.env');
 
-$server_name = $env['DB_SERVER'];
-$username = $env['DB_USERNAME'];
-$password = $env['DB_PASSWORD'];
+include("database.php");
 
-$DB_NAME = "insurance_db";
-$use_current_DB= "USE $DB_NAME";
+$conn = connect_to_database();
+use_current_db($conn);
 
 
-$conn = mysqli_connect($server_name, $username, $password);
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error() . PHP_EOL);
-}
-echo "DB Connected successfully" . PHP_EOL;
+echo   PHP_EOL . "solution to: 3.2 A):". PHP_EOL .PHP_EOL ;
 
-
-$sql = "$use_current_DB";
-if (mysqli_query($conn, $sql)) {
-} else {
-    echo "Error with DB: " . mysqli_error($conn)  . PHP_EOL;
-}
-
-
-echo "\n" . "solution to: 3.2 A):\n\n";
-$sql = "SELECT  LPAD(CAST(p.pn AS CHAR), 10, '0') AS formatted_pn,  p.last,  p.first, p._id, DATE_FORMAT(i.from_date, '%m-%d-%y') AS from_date, DATE_FORMAT(i.to_date, '%m-%d-%y') AS to_date  FROM patient as p
+$sql = "SELECT  LPAD(CAST(p.pn AS CHAR), 11, '0') AS formatted_pn,  p.last,  p.first, p._id, DATE_FORMAT(i.from_date, '%m-%d-%y') AS from_date, DATE_FORMAT(i.to_date, '%m-%d-%y') AS to_date  FROM patient as p
 INNER JOIN insurance as i on i.patient_id = p._id
 ORDER BY to_date, last";
 
@@ -38,7 +22,9 @@ if ($result->num_rows > 0) {
   }
 
 
-echo "\n\n" . "solution to: 3.2 B):\n\n";
+echo PHP_EOL . PHP_EOL . "solution to: 3.2 B):" . PHP_EOL . PHP_EOL;
+
+
 
 $sql = "SELECT  p.last,  p.first FROM patient as p;";
 $result = $conn->query($sql);
@@ -79,7 +65,7 @@ if ($result->num_rows > 0) {
 
   foreach ($letter_map as $key => $value) {
     $precentage = round($value/$total *100, 2);
-    echo "$key\t$value\t$precentage" . "%\n";
+    echo "$key\t$value\t$precentage" . "%" . PHP_EOL;
 }
 
 mysqli_close($conn);

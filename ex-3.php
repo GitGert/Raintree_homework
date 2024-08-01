@@ -36,8 +36,6 @@ class Patient implements PatientRecord {
             $temp_val = new Insurance($patient_insurance_IDs[$i]);
             array_push( $this -> insurace_records, $temp_val);
         }
-
-        // $this ->insurace_records = get_patients_insurance_data($conn, $patient_number);
         mysqli_close($conn);
     }
 
@@ -69,10 +67,11 @@ class Patient implements PatientRecord {
             $format = "d-m-y";
             $start_date  = \DateTime::createFromFormat($format, $start_date);
             $end_date  = \DateTime::createFromFormat($format, $end_date);
+            //TODO: handle case where the input string already is a date.
             $new_date  = \DateTime::createFromFormat($format, $input_date);
 
             $isValid = "No";
-            if ($new_date < $end_date){
+            if ($new_date <= $end_date && $new_date >= $start_date){
                 $isValid = "Yes";
             }
 
@@ -90,12 +89,7 @@ class Insurance implements PatientRecord {
     private $from_date ;
     private $to_date ;
 
-    // public function __toString(){
-    //     return "\n\nInsurance class currently only has its own id: " . $this -> insurance_id;
-    // }
-
     public function __construct($insurance_id) {
-        // make db query with the given insurance_id...?
 
         $conn = connect_to_database();
         use_current_db($conn);
@@ -109,26 +103,19 @@ class Insurance implements PatientRecord {
 
         mysqli_close($conn);
     }
-    // public function get_id();
-    // public function get_patient_number();
 
     public function is_insurance_valid($date){
         $infinite = False;
         if (!$this -> to_date){
             $infinite = True;
         }
-        $format = "d-m-y";
         
+        $format = "Y-m-d";
         $start_date  = \DateTime::createFromFormat($format, $this -> from_date);
         $end_date  = \DateTime::createFromFormat($format, $this -> to_date);
+        $format = "d-m-y";
         $new_date  = \DateTime::createFromFormat($format, $date);
         
-        echo $start_date -> Format("d-m-y\n");
-        echo $end_date -> Format("d-m-y\n");
-        echo $new_date -> Format("d-m-y\n");
-
-        // echo $new_date >= $start_date
-        // echo $new_date = $start_date
 
         if ($new_date >= $start_date && $new_date <=$end_date || $infinite == True && $new_date >= $start_date){
             return True;
@@ -157,10 +144,9 @@ class Insurance implements PatientRecord {
 // $patient1 = new Patient($temp_pn);
 // echo $patient1->get_patient_number() . PHP_EOL;
 // $patient1->show_patient_insurance_isValid("03-10-20");
-// echo $patient1->get_patient_insurance_records()[1];
 // $insurace_1 = new Insurance("1");
 // $bool_val=  $insurace_1 -> is_insurance_valid("06-01-23");
 // echo $bool_val ? 'true' : 'false';
-// echo "\n"
+// echo  PHP_EOL
 
 ?>
